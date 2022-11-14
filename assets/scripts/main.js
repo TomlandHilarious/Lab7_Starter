@@ -84,15 +84,37 @@ async function getRecipes() {
   // A1. TODO - Check local storage to see if there are any recipes.
   //            If there are recipes, return them.
   let recipe = localStorage.getItem("recipes");
-  if (recipe != null) {
+  if (recipe !== null) {
     return JSON.parse(recipe);
   }
+  let recipe_list = new Array();
+    let promise = new Promise(async (resolve, reject) =>  {
+      for (let i = 0; i < RECIPE_URLS.length; ++i) {
+        try {
+          let response = await fetch(RECIPE_URLS[i]);
+          let new_recipe = await response.json();
+          recipe_list.push(new_recipe);
+          console.log(recipe_list.length);
+          if (recipe_list.length === RECIPE_URLS.length) {
+            saveRecipesToStorage(recipe_list);
+            resolve(recipe_list);
+          }
+        } catch (error) {
+          console.error(error);
+          reject(error);
+  
+        }   
+      }
+    });
+    const result = await promise;
+    return result;   
+
 
   /**************************/
   // The rest of this method will be concerned with requesting the recipes
   // from the network
   // A2. TODO - Create an empty array to hold the recipes that you will fetch
-  let recipe_list = new Array();
+ 
   // A3. TODO - Return a new Promise. If you are unfamiliar with promises, MDN
   //            has a great article on them. A promise takes one parameter - A
   //            function (we call these callback functions). That function will
@@ -121,25 +143,7 @@ async function getRecipes() {
   //            resolve() method.
   // A10. TODO - Log any errors from catch using console.error
   // A11. TODO - Pass any errors to the Promise's reject() function
-  let promise = new Promise(async (resolve, reject) =>  {
-    for (let i = 0; i < RECIPE_URLS.length; ++i) {
-      try {
-        let response = await fetch(RECIPE_URLS[i]);
-        let new_recipe = await response.json();
-        recipe_list.push(new_recipe);
-        if (recipe_list.length == RECIPE_URLS.length) {
-          saveRecipesToStorage(recipe_list);
-        }
-        resolve(recipe_list);
-      } catch (error) {
-        console.log(error);
-        reject(error);
-
-      }
-    }
-  });
-  return promise;
-
+  
 }
 
 /**
