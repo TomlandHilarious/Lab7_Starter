@@ -138,6 +138,7 @@ async function getRecipes() {
       }
     }
   });
+  return promise;
 
 }
 
